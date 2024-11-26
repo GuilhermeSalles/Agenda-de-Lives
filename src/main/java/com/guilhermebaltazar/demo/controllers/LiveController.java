@@ -2,7 +2,7 @@ package com.guilhermebaltazar.demo.controllers;
 
 import com.guilhermebaltazar.demo.entities.Live;
 import com.guilhermebaltazar.demo.services.LiveService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,11 +12,14 @@ import java.util.List;
 @RequestMapping("/lives")
 public class LiveController {
 
-    @Autowired
-    private LiveService liveService;
+    private final LiveService liveService;
+
+    public LiveController(LiveService liveService) {
+        this.liveService = liveService;
+    }
 
     @PostMapping
-    public ResponseEntity<Live> create(@RequestBody Live live) {
+    public ResponseEntity<Live> create(@Valid @RequestBody Live live) {
         Live createdLive = liveService.create(live);
         return ResponseEntity.status(201).body(createdLive);
     }
@@ -27,20 +30,16 @@ public class LiveController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Live> getById(@PathVariable Long id) {
+    public ResponseEntity<Live> getById(@PathVariable("id") @Valid Long id) {
         return liveService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Live> update(@PathVariable Long id, @RequestBody Live live) {
-        try {
-            Live updatedLive = liveService.update(id, live);
-            return ResponseEntity.ok(updatedLive);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Live> update(@PathVariable Long id, @Valid @RequestBody Live live) {
+        Live updatedLive = liveService.update(id, live);
+        return ResponseEntity.ok(updatedLive);
     }
 
     @DeleteMapping("/{id}")
