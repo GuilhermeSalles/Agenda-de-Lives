@@ -1,13 +1,31 @@
 package com.guilhermebaltazar.demo.controllers;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.guilhermebaltazar.demo.entities.Live;
 import com.guilhermebaltazar.demo.services.LiveService;
+
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/lives")
 public class LiveController {
@@ -18,35 +36,55 @@ public class LiveController {
         this.liveService = liveService;
     }
 
-    @PostMapping
-    public ResponseEntity<Live> create(@Valid @RequestBody Live live) {
-        Live createdLive = liveService.create(live);
-        return ResponseEntity.status(201).body(createdLive);
-    }
-
     @GetMapping
-    public ResponseEntity<List<Live>> getAll() {
-        return ResponseEntity.ok(liveService.findAll());
+    public ResponseEntity<Page<Live>> getAllLives(
+            @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
+            @RequestParam(required = false) String flag) {
+        Page<Live> livePage = liveService.findAll(pageable, flag);
+        if (livePage.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(livePage, HttpStatus.OK);
+        }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Live> getById(@PathVariable("id") @Valid Long id) {
-        return liveService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Live> getOneLive(@PathVariable("id") Long id) {
+        Optional<Live> liveO = liveService.findById(id);
+        if (!liveO.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(liveO.get(), HttpStatus.OK);
+        }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Live> update(@PathVariable Long id, @Valid @RequestBody Live live) {
-        Live updatedLive = liveService.update(id, live);
-        return ResponseEntity.ok(updatedLive);
+    @PostMapping
+    public ResponseEntity<Live> saveLive(@Valid @RequestBody Live live) {
+        live.setRegistrationDate(LocalDateTime.now());
+        Live savedLive = liveService.create(live);
+        return new ResponseEntity<>(savedLive, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (liveService.delete(id)) {
-            return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> deleteLive(@PathVariable("id") Long id) {
+        Optional<Live> liveO = liveService.findById(id);
+        if (!liveO.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            liveService.delete(id);
+            return new ResponseEntity<>(HttpStatus.OK);
         }
-        return ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Live> updateLive(@PathVariable("id") Long id, @Valid @RequestBody Live live) {
+        Optional<Live> liveO = liveService.findById(id);
+        if (!liveO.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            live.setId(liveO.get().getId());
+            Live updatedLive = liveService.update(id, live);
+            return new ResponseEntity<>(updatedLive, HttpStatus.OK);
+        }
     }
 }

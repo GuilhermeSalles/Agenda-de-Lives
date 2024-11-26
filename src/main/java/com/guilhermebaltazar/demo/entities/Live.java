@@ -5,13 +5,7 @@ import java.util.Objects;
 
 import com.guilhermebaltazar.demo.enums.LiveStatus;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "lives")
@@ -21,17 +15,26 @@ public class Live {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String liveName;
 
+    @Column(nullable = false)
     private String channelName;
 
+    @Column(nullable = false)
     private LocalDateTime liveDate;
 
+    @Column(nullable = false)
     private String liveLink;
 
+    @Column(nullable = false)
+    private LocalDateTime registrationDate;
+
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private LiveStatus liveStatus;
 
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -72,6 +75,14 @@ public class Live {
         this.liveLink = liveLink;
     }
 
+    public LocalDateTime getRegistrationDate() {
+        return registrationDate;
+    }
+
+    public void setRegistrationDate(LocalDateTime registrationDate) {
+        this.registrationDate = registrationDate;
+    }
+
     public LiveStatus getLiveStatus() {
         return liveStatus;
     }
@@ -79,21 +90,20 @@ public class Live {
     public void setLiveStatus(LiveStatus liveStatus) {
         this.liveStatus = liveStatus;
     }
-	@Override
-	public int hashCode() {
-		return Objects.hash(id);
-	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Live other = (Live) obj;
-		return Objects.equals(id, other.id);
-	}
+    // hashCode and equals
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        Live other = (Live) obj;
+        return Objects.equals(id, other.id);
+    }
 }
