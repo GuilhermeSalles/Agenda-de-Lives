@@ -1,6 +1,6 @@
 
 # 📺 Agenda Live
-[![NPM](https://img.shields.io/npm/l/react)](https://github.com/GuilhermeSalles/Tomas-BigPizza/blob/main/LICENSE) 
+[![NPM](https://img.shields.io/npm/l/react)](https://github.com/GuilhermeSalles/Agenda-de-Lives/blob/main/LICENSE) 
 
 Este é um projeto para o agendamento de lives, desenvolvido com **Spring Boot**, **JPA** e **PostgreSQL**. O sistema fornece uma API REST para gerenciar eventos de live, com suporte a filtros por data e paginação.
 
